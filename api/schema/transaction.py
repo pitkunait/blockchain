@@ -4,13 +4,16 @@ from marshmallow.fields import Str, Number, Nested
 
 class TransactionSchema(Schema):
     class Meta:
-        # Fields to expose
-        fields = ["sender", "recipient", "amount", "timestamp"]
+        ordered = True
+        fields = ["id", "sender", "recipient", "amount", "timestamp", "signature", "public_key"]
 
+    id = Str()
     sender = Str()
     recipient = Str()
     amount = Number()
     timestamp = Number()
+    signature = Str()
+    public_key = Str()
 
 
 class TransactionCreatedSchema(Schema):

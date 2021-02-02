@@ -5,7 +5,6 @@ from api.schema.block import BlockSchema
 
 class BlockchainSchema(Schema):
     class Meta:
-        # Fields to expose
         fields = ["blockchain"]
 
     blockchain = Nested(BlockSchema, many=True)

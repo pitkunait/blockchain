@@ -1,27 +1,26 @@
-from flask import Blueprint
-from api.globals import blockchain
+from flask import Blueprint, request
 from api.schema.miner import MineSchema
+from api.schema.block import BlockSchema
+from chain.globals import blockchain
+from core.Block import Block
 
 miner_api = Blueprint('miner', __name__)
 
 
-@miner_api.route('/mine', methods=['POST'])
+@miner_api.route('/', methods=['POST'])
 def mine():
-    """
-    Mines a new block into the chain
-    Consolidates the pending transactions into a new block, and adds the block to the blockchain
-    ---
-    produces:
-        - application/json
-    responses:
-        200:
-            description: Result of the mining attempt and the new block
-    """
-    block = blockchain.mine('address')
+    values = request.get_json()
+    required = ['block']
+    if not all(k in values for k in required):
+        return MineSchema().dumps({'message': 'Invalid block'}), 400
+    block_schema = BlockSchema().load(values['block'])
+    block = Block.from_schema(block_schema)
+    valid = blockchain.add_block(block)
+    if valid:
+        response = {
+            'message': "New Block Mined",
+            'block': block
+        }
+        return MineSchema().dumps(response), 201
+    return MineSchema().dumps({'message': 'Invalid block'}), 400
 
-    response = {
-        'message': "New Block Mined",
-        'block': block
-    }
-
-    return MineSchema().dumps(response), 200

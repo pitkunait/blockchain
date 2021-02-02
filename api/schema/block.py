@@ -5,7 +5,7 @@ from api.schema.transaction import TransactionSchema
 
 class BlockSchema(Schema):
     class Meta:
-        # Fields to expose
+        ordered = True
         fields = ["index", "timestamp", "transactions", "nonce", "previous_hash", "hash"]
 
     index = Number()

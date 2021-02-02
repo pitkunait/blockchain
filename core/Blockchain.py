@@ -1,10 +1,4 @@
-import logging
-import threading
-
-from blockchain.Block import Block
-from blockchain.Transaction import Transaction
-
-logger = logging.getLogger()
+from core.Block import Block
 
 
 class Blockchain:
@@ -12,9 +6,9 @@ class Blockchain:
     def __init__(self):
         self.__current_transactions = []
         self.__chain = []
-        self.create_genesis()
+        self.__transaction_ids = []
         self.pof_strength = 4
-        self.start_mining_thread()
+        self.create_genesis()
 
     @property
     def last_block(self):
@@ -33,7 +27,7 @@ class Blockchain:
         return self.__chain
 
     @property
-    def last100(self):
+    def last20(self):
         return self.__chain[-20:]
 
     def create_genesis(self):
@@ -41,40 +35,18 @@ class Blockchain:
         self.__chain.append(genesis_block)
 
     def add_block(self, block):
-        valid = self.validate_block(block)
-        if valid:
+        if self.validate_block(block):
             self.__chain.append(block)
             self.__current_transactions = []
             return True
         return False
 
-    def create_transaction(self, sender, recipient, amount):
-        transaction = Transaction(sender, recipient, amount)
-        if transaction.validate():
+    def add_transaction(self, transaction):
+        if self.validate_transaction(transaction):
             self.__current_transactions.append(transaction)
+            self.__transaction_ids.append(transaction.id)
             return transaction, True
         return None, False
-
-    def start_mining_thread(self):
-        def infinite_mine():
-            while True:
-                self.mine()
-
-        x = threading.Thread(target=infinite_mine, daemon=True)
-        x.start()
-
-    def mine(self):
-        nonce = 0
-        while True:
-            nonce += 1
-            block = Block(self.last_block.index + 1, self.__current_transactions, nonce, self.last_block.hash)
-            if self.validate_proof_of_work(block):
-                block.set_hash()
-                break
-        print(f"Mined block {block.index}")
-        if self.add_block(block):
-            return block
-        return None
 
     def validate_proof_of_work(self, block):
         return block.first_n(self.pof_strength) == '0' * self.pof_strength
@@ -87,5 +59,12 @@ class Blockchain:
         if block.hash != block.hash_block():
             return False
         if not self.validate_proof_of_work(block):
+            return False
+        return True
+
+    def validate_transaction(self, transaction):
+        if not transaction.validate():
+            return False
+        if transaction.id in self.__transaction_ids:
             return False
         return True

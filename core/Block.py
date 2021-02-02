@@ -4,7 +4,7 @@ from time import time
 
 
 class Block:
-    def __init__(self, index, transactions, nonce, previous_hash):
+    def __init__(self, index=None, transactions=None, nonce=None, previous_hash=None):
         self.index = index
         self.timestamp = time()
         self.transactions = transactions
@@ -29,3 +29,10 @@ class Block:
 
     def set_hash(self):
         self.hash = self.hash_block()
+
+    @staticmethod
+    def from_schema(schema):
+        block = Block()
+        for key, value in schema.items():
+            setattr(block, key, value)
+        return block

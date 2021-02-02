@@ -5,7 +5,6 @@ from api.schema.block import BlockSchema
 
 class MineSchema(Schema):
     class Meta:
-        # Fields to expose
         fields = ["message", "block"]
 
     message = Str()

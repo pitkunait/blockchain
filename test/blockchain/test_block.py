@@ -1,5 +1,5 @@
 from unittest import TestCase
-from blockchain.Block import Block
+from core.Block import Block
 
 
 class TestBlock(TestCase):
