@@ -16,7 +16,6 @@ def new_transaction():
         return TransactionCreatedSchema().dumps({'message': 'Invalid transaction'}), 400
     transaction_schema = TransactionSchema().load(values['transaction'])
     transaction = Transaction.from_schema(transaction_schema)
-
     transaction, valid = blockchain.add_transaction(transaction)
     if valid:
         response = {

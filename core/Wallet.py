@@ -1,6 +1,10 @@
 import hashlib
 import uuid
+
 import rsa
+
+from rsa.pem import save_pem
+
 from core.Transaction import Transaction
 
 
@@ -13,6 +17,8 @@ class Wallet:
 
     def sign_transaction(self, transaction: Transaction) -> Transaction:
         signature = rsa.sign(transaction.plain().encode(), self.private_key, 'SHA-1')
-        transaction.public_key = self.public_key.save_pkcs1().hex()
+        der = self.public_key._save_pkcs1_der()
+        # self.public_key.save_pkcs1()
+        transaction.public_key = save_pem(der, 'PUBLIC KEY').hex()
         transaction.signature = signature.hex()
         return transaction
