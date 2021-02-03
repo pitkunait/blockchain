@@ -33,6 +33,7 @@ class Blockchain:
     def create_genesis(self):
         genesis_block = Block(0, self.__current_transactions, 0, 'Genesis Block')
         self.__chain.append(genesis_block)
+        self.mine_genesis()
 
     def add_block(self, block):
         if self.validate_block(block):
@@ -68,3 +69,15 @@ class Blockchain:
         if transaction.id in self.__transaction_ids:
             return False
         return True
+
+    def mine_genesis(self):
+        nonce = 0
+        while True:
+            nonce += 1
+            block = Block(self.last_block.index + 1, self.__current_transactions, nonce, self.last_block.hash)
+            if self.validate_proof_of_work(block):
+                block.set_hash()
+                break
+        if self.add_block(block):
+            return block
+        return None

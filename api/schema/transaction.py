@@ -1,5 +1,5 @@
 from flask_marshmallow import Schema
-from marshmallow.fields import Str, Number, Nested
+from marshmallow.fields import Str, Number, Nested, Int
 
 
 class TransactionSchema(Schema):
@@ -10,15 +10,21 @@ class TransactionSchema(Schema):
     id = Str()
     sender = Str()
     recipient = Str()
-    amount = Number()
+    amount = Int()
     timestamp = Number()
     signature = Str()
     public_key = Str()
 
 
+class TransactionsSchema(Schema):
+    class Meta:
+        fields = ["transactions"]
+
+    transactions = Nested(TransactionSchema(), many=True)
+
+
 class TransactionCreatedSchema(Schema):
     class Meta:
-        # Fields to expose
         fields = ["message", "transaction"]
 
     message = Str()

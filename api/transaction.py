@@ -1,7 +1,6 @@
 from flask import Blueprint, request
 
-
-from api.schema.transaction import TransactionCreatedSchema, TransactionSchema
+from api.schema.transaction import TransactionCreatedSchema, TransactionSchema, TransactionsSchema
 from chain.globals import blockchain
 from core.Transaction import Transaction
 
@@ -24,3 +23,11 @@ def new_transaction():
         }
         return TransactionCreatedSchema().dumps(response), 201
     return TransactionCreatedSchema().dumps({'message': 'Invalid transaction'}), 400
+
+
+@transaction_api.route('/', methods=['GET'])
+def get_transaction():
+    response = {
+        'transactions': blockchain.pending_transactions
+    }
+    return TransactionsSchema().dumps(response), 200

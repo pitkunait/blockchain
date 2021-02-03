@@ -1,5 +1,5 @@
 from flask_marshmallow import Schema
-from marshmallow.fields import Nested, Str, Number
+from marshmallow.fields import Nested, Str, Int, Number
 from api.schema.transaction import TransactionSchema
 
 
@@ -8,8 +8,8 @@ class BlockSchema(Schema):
         ordered = True
         fields = ["index", "timestamp", "transactions", "nonce", "previous_hash", "hash"]
 
-    index = Number()
-    nonce = Str()
+    index = Int()
+    nonce = Int()
     timestamp = Number()
     previous_hash = Str()
     hash = Str()

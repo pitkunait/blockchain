@@ -2,7 +2,6 @@ from time import time
 import uuid
 import rsa
 from rsa import VerificationError
-from rsa.pem import load_pem
 from api.schema.transaction import TransactionSchema
 
 
@@ -35,7 +34,7 @@ class Transaction:
         if ignore is None:
             ignore = []
         block_params = {x: self.__dict__[x] for x in self.__dict__ if x not in ignore}
-        return TransactionSchema().dumps(block_params)
+        return TransactionSchema().dumps(block_params, separators=(',', ':'))
 
     def plain(self):
         return self.serialize(['signature', 'public_key'])
@@ -44,16 +43,10 @@ class Transaction:
         transaction = self.plain().encode()
         if self.signature and self.public_key:
             pk_bytes = bytes.fromhex(self.public_key)
-            print(pk_bytes)
-            der = rsa.pem.load_pem(pk_bytes, 'PUBLIC KEY')
-            print(der)
-            # pk = rsa.PublicKey._load_pkcs1_der(der)
             pk = rsa.PublicKey.load_pkcs1_openssl_pem(pk_bytes)
             try:
-                print(transaction)
                 return rsa.verify(transaction, bytes.fromhex(self.signature), pk)
             except VerificationError:
-                print('eROOROR')
                 return False
         else:
             return False
