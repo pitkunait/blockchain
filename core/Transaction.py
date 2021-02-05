@@ -24,7 +24,13 @@ class Transaction:
         self.public_key = public_key
 
     def validate(self):
-        if self.amount < 0:
+        if self.amount <= 0:
+            return False
+        if not self.recipient:
+            return False
+        if not self.sender:
+            return False
+        if self.recipient == self.sender:
             return False
         if not self.verify_signature():
             return False
@@ -40,12 +46,11 @@ class Transaction:
         return self.serialize(['signature', 'public_key'])
 
     def verify_signature(self):
-        transaction = self.plain().encode()
         if self.signature and self.public_key:
             pk_bytes = bytes.fromhex(self.public_key)
             pk = rsa.PublicKey.load_pkcs1_openssl_pem(pk_bytes)
             try:
-                return rsa.verify(transaction, bytes.fromhex(self.signature), pk)
+                return rsa.verify(self.plain().encode(), bytes.fromhex(self.signature), pk)
             except VerificationError:
                 return False
         else:

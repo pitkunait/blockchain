@@ -2,6 +2,7 @@ import hashlib
 from time import time
 
 from api.schema.block import BlockSchema
+from core.Transaction import Transaction
 
 
 class Block:
@@ -38,3 +39,7 @@ class Block:
         for key, value in schema.items():
             setattr(block, key, value)
         return block
+
+    def parseTransactions(self):
+        for i in range(len(self.transactions)):
+            self.transactions[i] = Transaction.from_schema(self.transactions[i])

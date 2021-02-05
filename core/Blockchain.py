@@ -1,4 +1,8 @@
+import logging
+
 from core.Block import Block
+
+logger = logging.getLogger(__name__)
 
 
 class Blockchain:
@@ -30,6 +34,35 @@ class Blockchain:
     def last20(self):
         return self.__chain[-20:]
 
+    @property
+    def all_transactions(self):
+        transactions = []
+        for block in self.full_chain:
+            transactions += block.transactions
+        return transactions
+
+    def get_transactions_by_id(self, id):
+        transactions = []
+        for transaction in self.all_transactions:
+            if transaction['recipient'] == id or transaction['sender'] == id:
+                transactions.append(transaction)
+        return transactions
+
+    def get_transaction_balance(self, transaction, id):
+        if transaction.recipient == id:
+            return transaction.amount
+        elif transaction.sender == id:
+            return -transaction.amount
+
+    def get_balance_by_id(self, id):
+        balance = 0
+        for block in self.full_chain:
+            for transaction in block.transactions:
+                balance += self.get_transaction_balance(transaction, id)
+        for transaction in self.pending_transactions:
+            balance += self.get_transaction_balance(transaction, id)
+        return balance
+
     def create_genesis(self):
         genesis_block = Block(0, self.__current_transactions, 0, 'Genesis Block')
         self.__chain.append(genesis_block)
@@ -37,6 +70,7 @@ class Blockchain:
 
     def add_block(self, block):
         if self.validate_block(block):
+            block.parseTransactions()
             self.__chain.append(block)
             self.__current_transactions = []
             return True
@@ -65,8 +99,13 @@ class Blockchain:
 
     def validate_transaction(self, transaction):
         if not transaction.validate():
+            logger.error('Transaction not validated')
+            return False
+        if self.get_balance_by_id(transaction.sender) < transaction.amount:
+            logger.error('Not enough balance')
             return False
         if transaction.id in self.__transaction_ids:
+            logger.error('Already present')
             return False
         return True
 
